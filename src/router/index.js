@@ -1,27 +1,51 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
+import Vue from "vue"
+import Router from "vue-router"
 
-Vue.use(VueRouter)
+import main from "@/router/modules/main"
 
-  const routes = [
+Vue.use(Router)
+
+//通用路由
+export const routes = [
+  main,
+]
+
+//未定义路由
+export const noneRoute = [
   {
-    path: '/',
-    name: 'Home',
-    component: Home
-  },
-  {
-    path: '/about',
-    name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
+    path: '*',
+    name: '404',
+    meta: {
+      title: "404"
+    },
+    redirect: { name: 'Home' },
   }
 ]
 
-const router = new VueRouter({
-  routes
-})
+//登录可见路由
+export const authRoutes = [
+]
+
+const routerPush = Router.prototype.push
+Router.prototype.push = function push(location) {
+  return routerPush.call(this, location).catch(error => error)
+}
+
+const createRouter = function () {
+  return new Router({
+    // mode: 'history', // require service support
+    scrollBehavior: () => ({ y: 0 }),
+    routes: routes
+  })
+
+}
+
+const router = createRouter()
+
+// Detail see: https://github.com/vuejs/vue-router/issues/1234#issuecomment-357941465
+export function resetRouter() {
+  const newRouter = createRouter()
+  router.matcher = newRouter.matcher // reset router
+}
 
 export default router
